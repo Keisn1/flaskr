@@ -11,3 +11,11 @@ What to learn
 2. Run the Test (should fail)
 3. Write just enough code for the test to pass
 4. Refactor code and retest, again and again
+
+* Database
+1. Create a schema.sql file
+2. Update app with configuration
+   - Here, we created a configuration section for config variables (with the name of the future SQLite database) and loaded the config after app initialization.
+   - test existence of a file
+   - *This is a test-driven test* the file doesn't exist yet, so it needs to
+     fail first
