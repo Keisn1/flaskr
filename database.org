@@ -1,0 +1,92 @@
+#+title: Database
+#+startup: overview
+* Schema
+#+begin_src sqlite :db instance/test.sqlite :colnames yes
+drop table if exists 'users';
+drop table if exists 'videos';
+
+create table users (
+  'userId' integer primary key autoincrement,
+  'name' text not null,
+  'email' text not null,
+  'password' text not null,
+  'created_at' text default CURRENT_TIMESTAMP,
+  'updated_at' text default CURRENT_TIMESTAMP
+);
+
+create table videos (
+  'videoId' integer primary key autoincrement,
+  'title' text not null,
+  'description' text not null,
+  'url' text not null,
+  'userId' integer not null,
+  'created_at' text default CURRENT_TIMESTAMP,
+  'updated_at' text default CURRENT_TIMESTAMP,
+  foreign key (UserId) references users (UserId)
+);
+#+end_src
+
+#+RESULTS:
+* Real data
+#+begin_src sqlite :db instance/db.sqlite :colnames yes
+select * from users;
+#+end_src
+
+#+RESULTS:
+| userId | name  | email | password                                                                                               | created_at          | updated_at          |
+|--------+-------+-------+--------------------------------------------------------------------------------------------------------+---------------------+---------------------|
+|      1 | keisn | keisn | pbkdf2:sha256:600000$aSpZQLsVt6Gvpy5Q$a1cc0dbf59fcc3776a0e410f966702ef3b5ec26a7b3496235cca00c86f21fbe7 | 2023-10-12 20:10:37 | 2023-10-12 20:10:37 |
+
+* TestData
+** Schema users
+#+begin_src sqlite :db instance/test.sqlite :colnames yes
+.schema users
+#+end_src
+
+#+RESULTS:
+| CREATE TABLE users (                        |   |
+|---------------------------------------------+---|
+| 'userId' integer primary key autoincrement  |   |
+| 'name' text not null                        |   |
+| 'email' text unique not null                |   |
+| 'password' text not null                    |   |
+| 'created_at' text default CURRENT_TIMESTAMP |   |
+| 'updated_at' text default CURRENT_TIMESTAMP |   |
+| );                                          |   |
+** delete and insert user
+*** create pw_hash
+#+begin_src python :results output
+from werkzeug.security import generate_password_hash
+print(generate_password_hash("test_pw1"))
+#+end_src
+
+*** insert user with pw_hash
+#+begin_src sqlite :db instance/test.sqlite :colnames yes
+delete from users;
+delete from `sqlite_sequence`;
+insert into users (name, email, password, created_at, updated_at) values('test_name1', 'test_email1', 'pbkdf2:sha256:600000$CflColapQX5g4WLt$39a913130a5d99c762237a97439f63d59d90f4f958c28bc16d69b2c31f5d7e85', '2023-10-12 00:00:00', '2023-10-12 01:00:00');
+-- select * from users;
+#+end_src
+
+** See Test data
+#+begin_src sqlite :db instance/test.sqlite :colnames yes
+select * from users;
+#+end_src
+
+#+RESULTS:
+| userId | name       | email       | password                                                                                               | created_at          | updated_at          |
+|--------+------------+-------------+--------------------------------------------------------------------------------------------------------+---------------------+---------------------|
+|      1 | test_name1 | test_email1 | pbkdf2:sha256:600000$CflColapQX5g4WLt$39a913130a5d99c762237a97439f63d59d90f4f958c28bc16d69b2c31f5d7e85 | 2023-10-12 00:00:00 | 2023-10-12 01:00:00 |
+
+* Reinit sequence data
+#+begin_src sqlite :db instance/test.sqlite :colnames yes
+select * from sqlite_sequence;
+#+end_src
+
+#+RESULTS:
+
+#+begin_src sqlite :db instance/test.sqlite :colnames yes
+delete from `sqlite_sequence`;
+#+end_src
+
+#+RESULTS:

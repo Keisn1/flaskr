@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Videos{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+{% if g.user%}
+<section>
+  <h2>My Videos</h2>
+</section>
+{% endif %}
+<section>
+  <h2>All Videos</h2>
+</section>
+{% endblock %}

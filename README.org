@@ -19,3 +19,9 @@ What to learn
    - test existence of a file
    - *This is a test-driven test* the file doesn't exist yet, so it needs to
      fail first
+
+* Environment Variables
+#+begin_src shell
+export TEST_FLASK_DATABASE="test.sqlite"
+export FLASK_DATABASE="project.sqlite"
+#+end_src
