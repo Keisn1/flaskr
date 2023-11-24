@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Create Video{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<form method="post">
+  <label for="video_title">Enter a title for the video:<input type="text" name="video_title" value="video_title" /></label>
+  <label for="video_description"><textarea name="video_description" value="video_description" rows="10" cols="30" placeholder="Enter video description here..."></textarea></label>
+  <label for="video_path">Upload<input type="text" name="video_path" value="video_path"></label>
+  <button type="submit">Upload video</button>
+</form>
+{% endblock %}

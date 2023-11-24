@@ -5,12 +5,23 @@
 {% endblock %}
 
 {% block content %}
-{% if g.user%}
+{% if g.user %}
 <section>
   <h2>My Videos</h2>
+  <a href="{{ url_for('videos.create') }}">Create a new video</a>
+  <ul>
+    {% for video in videos|selectattr("userId", "equalto", g.user["userId"]) %}
+    <h3>{{ video['title'] }}</h3>
+    {% endfor %}
+  </ul>
 </section>
 {% endif %}
 <section>
   <h2>All Videos</h2>
+  <ul>
+    {% for video in videos %}
+    <h3>{{ video['title'] }}</h3>
+    {% endfor %}
+  </ul>
 </section>
 {% endblock %}

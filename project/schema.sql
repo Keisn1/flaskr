@@ -14,9 +14,10 @@ create table videos (
   'videoId' integer primary key autoincrement,
   'title' text not null,
   'description' text not null,
-  'url' text not null,
+  'videoPath' text not null,
   'userId' integer not null,
   'created_at' text default CURRENT_TIMESTAMP,
   'updated_at' text default CURRENT_TIMESTAMP,
   foreign key (UserId) references users (UserId)
 );
+

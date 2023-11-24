@@ -74,23 +74,46 @@ def login():
         if error is None:
             session.clear()
             session["userId"] = user["userId"]
-            return redirect(url_for("index"))
+            return redirect(url_for("videos.index"))
 
         flash(error)
 
     return render_template("auth/login.html")
 
 
+@bp.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("videos.index"))
+
+
 def login_required(view):
-    @functools.wraps
+    @functools.wraps(view)
     def wrapped_view(**kwargs):
         if g.user is None:
-            return redirect(url_for("login"))
+            return redirect(url_for("auth.login"))
         return view(**kwargs)
 
     return wrapped_view
 
 
+@bp.before_app_request
+def load_logged_in_client():
+    # bp.before_app_request registers a function that is called before every
+    # viewfunction no matter the URL is
+    user_id = session.get("userId")
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = (
+            get_db().execute(
+                "select userId, name, email from users where userId == ?",
+                (user_id,),
+            )
+        ).fetchone()
+
+
+#
 # @bp.before_request
 # def load_logged_in_client():
 #     # bp.before_app_request registers a function that is called before every

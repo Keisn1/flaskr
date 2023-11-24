@@ -3,6 +3,7 @@ import tempfile
 import os
 from project import create_app
 from project.db import get_db, init_db
+from flask import g
 
 # load sql script
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
@@ -17,8 +18,11 @@ def test_app():
     with app.app_context():
         init_db()
         get_db().executescript(_data_sql)  # load test data
+        g.db.close()
 
     yield app
+
+    os.unlink(app.config["DATABASE"])
 
 
 @pytest.fixture

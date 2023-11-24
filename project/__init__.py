@@ -1,7 +1,7 @@
 import os
 from . import db
 from flask import Flask, render_template, session, g
-from project.views import auth
+from project.views import auth, videos
 
 
 def create_app(testing: bool = False) -> Flask:
@@ -27,9 +27,7 @@ def create_app(testing: bool = False) -> Flask:
 
     db.init_app(app)
     app.register_blueprint(auth.bp)
-
-    @app.route("/")
-    def index():
-        return render_template("videos/index.html")
+    app.register_blueprint(videos.bp)
+    app.add_url_rule("/", endpoint="videos.index")
 
     return app

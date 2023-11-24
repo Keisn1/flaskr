@@ -1,14 +1,16 @@
 #+title: Database
 #+startup: overview
+
 * Schema
-#+begin_src sqlite :db instance/test.sqlite :colnames yes
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
+
 drop table if exists 'users';
 drop table if exists 'videos';
 
 create table users (
   'userId' integer primary key autoincrement,
   'name' text not null,
-  'email' text not null,
+  'email' text unique not null,
   'password' text not null,
   'created_at' text default CURRENT_TIMESTAMP,
   'updated_at' text default CURRENT_TIMESTAMP
@@ -18,28 +20,35 @@ create table videos (
   'videoId' integer primary key autoincrement,
   'title' text not null,
   'description' text not null,
-  'url' text not null,
+  'videoPath' text not null,
   'userId' integer not null,
   'created_at' text default CURRENT_TIMESTAMP,
   'updated_at' text default CURRENT_TIMESTAMP,
   foreign key (UserId) references users (UserId)
 );
 #+end_src
-
 #+RESULTS:
 * Real data
+** user data
 #+begin_src sqlite :db instance/db.sqlite :colnames yes
 select * from users;
 #+end_src
 
 #+RESULTS:
-| userId | name  | email | password                                                                                               | created_at          | updated_at          |
-|--------+-------+-------+--------------------------------------------------------------------------------------------------------+---------------------+---------------------|
-|      1 | keisn | keisn | pbkdf2:sha256:600000$aSpZQLsVt6Gvpy5Q$a1cc0dbf59fcc3776a0e410f966702ef3b5ec26a7b3496235cca00c86f21fbe7 | 2023-10-12 20:10:37 | 2023-10-12 20:10:37 |
+** video data
+#+begin_src sqlite :db instance/db.sqlite :colnames yes
+select * from videos;
+#+end_src
+
+#+RESULTS:
+| videoId | title       | description       | videoPath  | userId | created_at          | updated_at          |
+|---------+-------------+-------------------+------------+--------+---------------------+---------------------|
+|       1 | test_title1 | test_description1 | test_path1 |      1 | 2023-10-29 08:47:18 | 2023-10-29 08:47:18 |
+|       2 | test_title2 | test_description2 | test_path2 |      2 | 2023-10-29 08:47:18 | 2023-10-29 08:47:18 |
 
 * TestData
 ** Schema users
-#+begin_src sqlite :db instance/test.sqlite :colnames yes
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
 .schema users
 #+end_src
 
@@ -58,25 +67,109 @@ select * from users;
 #+begin_src python :results output
 from werkzeug.security import generate_password_hash
 print(generate_password_hash("test_pw1"))
+print(generate_password_hash("test_pw2"))
 #+end_src
 
-*** insert user with pw_hash
-#+begin_src sqlite :db instance/test.sqlite :colnames yes
+#+RESULTS:
+: pbkdf2:sha256:600000$KctZrvFhZznh0qGO$a20b5d4c31529cca7cbb83755c04166306058f3741909e4ececf90fc2dd3edb3
+: pbkdf2:sha256:600000$6lgJ4rydabvwP5sL$550b65660f286fa81293cf4280b8a726a3feeff2bb5e236ed1f8c1a67820c489
+
+*** insert user
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
 delete from users;
 delete from `sqlite_sequence`;
-insert into users (name, email, password, created_at, updated_at) values('test_name1', 'test_email1', 'pbkdf2:sha256:600000$CflColapQX5g4WLt$39a913130a5d99c762237a97439f63d59d90f4f958c28bc16d69b2c31f5d7e85', '2023-10-12 00:00:00', '2023-10-12 01:00:00');
+insert into users (name, email, password, created_at, updated_at) values
+            ('test_name1', 'test_email1', 'test_pw1', '2023-10-12 00:00:00', '2023-10-12 01:00:00'),
+            ('test_name2', 'test_email2', 'test_pw2', '2023-10-13 00:00:00', '2023-10-13 01:00:00');
 -- select * from users;
 #+end_src
 
-** See Test data
-#+begin_src sqlite :db instance/test.sqlite :colnames yes
+#+RESULTS:
+
+** See Test data user
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
 select * from users;
 #+end_src
 
 #+RESULTS:
-| userId | name       | email       | password                                                                                               | created_at          | updated_at          |
-|--------+------------+-------------+--------------------------------------------------------------------------------------------------------+---------------------+---------------------|
-|      1 | test_name1 | test_email1 | pbkdf2:sha256:600000$CflColapQX5g4WLt$39a913130a5d99c762237a97439f63d59d90f4f958c28bc16d69b2c31f5d7e85 | 2023-10-12 00:00:00 | 2023-10-12 01:00:00 |
+| userId | name       | email       | password | created_at          | updated_at          |
+|--------+------------+-------------+----------+---------------------+---------------------|
+|      1 | test_name1 | test_email1 | test_pw1 | 2023-10-12 00:00:00 | 2023-10-12 01:00:00 |
+|      2 | test_name2 | test_email2 | test_pw2 | 2023-10-13 00:00:00 | 2023-10-13 01:00:00 |
+** Get specific user
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
+select userId, name, email  from users where email == 'test_email1';
+#+end_src
+
+#+RESULTS:
+| userId | name       | email       |
+|--------+------------+-------------|
+|      1 | test_name1 | test_email1 |
+
+** insert video
+*** insert video for test_user1
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
+delete from videos;
+delete from `sqlite_sequence`;
+insert into videos (title, description, videoPath, userId) values
+            ('test_title1','test_description1','test_path1',1),
+            ('test_title2','test_description2','test_path2',1),
+            ('test_title3','test_description3','test_path3',2);
+#+end_src
+
+#+RESULTS:
+
+** See Test data videos
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
+select * from videos;
+#+end_src
+
+#+RESULTS:
+| videoId | title       | description       | videoPath  | userId | created_at          | updated_at          |
+|---------+-------------+-------------------+------------+--------+---------------------+---------------------|
+|       1 | test_title1 | test_description1 | test_path1 |      1 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
+|       2 | test_title2 | test_description2 | test_path2 |      1 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
+|       3 | test_title3 | test_description3 | test_path3 |      2 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
+** See videos of user
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
+select * from videos where userId == 1;
+#+end_src
+
+#+RESULTS:
+| videoId | title       | description       | videoPath  | userId | created_at          | updated_at          |
+|---------+-------------+-------------------+------------+--------+---------------------+---------------------|
+|       1 | test_title1 | test_description1 | test_path1 |      1 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
+|       2 | test_title2 | test_description2 | test_path2 |      1 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
+** See video with specific title
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
+select * from videos where title == "test_title1";
+#+end_src
+
+#+RESULTS:
+| videoId | title       | description       | videoPath  | userId | created_at          | updated_at          |
+|---------+-------------+-------------------+------------+--------+---------------------+---------------------|
+|       1 | test_title1 | test_description1 | test_path1 |      1 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
+** See video of user
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
+select * from videos where userId == 1;
+#+end_src
+
+#+RESULTS:
+| videoId | title       | description       | videoPath  | userId | created_at          | updated_at          |
+|---------+-------------+-------------------+------------+--------+---------------------+---------------------|
+|       1 | test_title1 | test_description1 | test_path1 |      1 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
+|       2 | test_title2 | test_description2 | test_path2 |      1 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
+
+** Update video of user
+#+begin_src sqlite :db instance/experiment.sqlite :colnames yes
+select * from videos where userId == 1;
+#+end_src
+
+#+RESULTS:
+| videoId | title       | description       | videoPath  | userId | created_at          | updated_at          |
+|---------+-------------+-------------------+------------+--------+---------------------+---------------------|
+|       1 | test_title1 | test_description1 | test_path1 |      1 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
+|       2 | test_title2 | test_description2 | test_path2 |      1 | 2023-10-29 09:02:53 | 2023-10-29 09:02:53 |
 
 * Reinit sequence data
 #+begin_src sqlite :db instance/test.sqlite :colnames yes
